@@ -1,6 +1,5 @@
 using System.Text.Json;
-
-
+using System.Threading.Channels;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,22 +10,39 @@ builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-string settings_file = app.Environment.IsDevelopment() ? "appsettings.Development.json" : "appsettings.json";
-
-
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
+if (app.Environment.IsDevelopment()) {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
-//app.UseHttpsRedirection();
 
 var messages = app.MapGroup("/messages");
+
 messages.MapGet("/", () => {
 
+    return "TODO!";
 
+});
+
+messages.MapGet("/sse", static async (HttpContext ctx, CancellationToken ct) => {
+
+    ctx.Response.Headers.TryAdd("Content-Type", "test/event-stream");
+    Subscription sub = MessagePassing.Subscribe();
+
+    while (!ct.IsCancellationRequested) {
+
+        var message = await sub.Read();
+        if (message != null) {
+
+            await ctx.Response.WriteAsJsonAsync(message);
+            await ctx.Response.Body.FlushAsync();
+            
+        }
+
+    }
+
+    sub.Unsubscribe();
 
 });
 

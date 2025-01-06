@@ -1,6 +1,4 @@
 
-using System.Security.Cryptography;
-
 class Message {
 
     public required string user_name {get; set;}
