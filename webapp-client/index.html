@@ -1,0 +1,26 @@
+
+<body>
+
+</body>
+
+<script>
+
+    const source = new EventSource("http://localhost:5275/messages/sse");
+    console.log(source);
+
+    source.onmessage = (event) => {
+        console.log(event.data);
+    }
+
+    var headers = new Headers();
+    headers.append("Content-Type", "application/json");
+
+    var request = new Request("http://localhost:5275/messages/submit", {
+        method: "POST",
+        body: '{ "user_name": "AnotherTest", "content": "Lots of content" }',
+        headers
+    });
+
+    fetch(request);
+
+</script>

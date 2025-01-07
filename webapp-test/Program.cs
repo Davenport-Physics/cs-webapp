@@ -8,6 +8,19 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddCors(options => {
+
+    options.AddDefaultPolicy(policy => {
+
+        policy
+            .AllowAnyOrigin()
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+
+    });
+
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -27,7 +40,7 @@ messages.MapGet("/", () => {
 
 messages.MapGet("/sse", static async (HttpContext ctx, CancellationToken ct) => {
 
-    ctx.Response.Headers.TryAdd("Content-Type", "test/event-stream");
+    ctx.Response.Headers.TryAdd("Content-Type", "text/event-stream");
     Subscription sub = MessagePassing.Subscribe();
 
     while (!ct.IsCancellationRequested) {
@@ -55,6 +68,7 @@ messages.MapPost("/submit", async (Message message) => {
 
 
 
+app.UseCors();
 app.Run();
 
 record UserMessage(string user_name, string message, string sent_time);
